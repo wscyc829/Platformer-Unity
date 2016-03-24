@@ -76,8 +76,6 @@ public class GameController : MonoBehaviour {
 	private Transform platforms_holder;
 	private Transform fallings_holder;
 
-	private GameObject player;
-
 	private float score;
 
 	void Awake() {
@@ -107,16 +105,15 @@ public class GameController : MonoBehaviour {
 		instruction_text.text = "Use 'Left & Right Arrow' To Move the Player\n" + 
 			"'Space' To Jump\n" + "Press 'R' To Start";
 
-		platforms_holder = new GameObject ("Platforms").transform;
+		platforms_holder = GameObject.Find ("Platforms").transform;
 		GameObject toInstantiate = platform_settings.platforms [0];
 		(Instantiate (toInstantiate, new Vector3(-6.5f, -7.5f, 0), Quaternion.identity) as GameObject).gameObject.transform.SetParent(platforms_holder.transform);
 		(Instantiate (toInstantiate, new Vector3(0f, -7.5f, 0), Quaternion.identity) as GameObject).gameObject.transform.SetParent(platforms_holder.transform);
 		(Instantiate (toInstantiate, new Vector3(6.5f, -7.5f, 0), Quaternion.identity) as GameObject).gameObject.transform.SetParent(platforms_holder.transform);
 		(Instantiate (toInstantiate, new Vector3(13f, -7.5f, 0), Quaternion.identity) as GameObject).gameObject.transform.SetParent(platforms_holder.transform);
 
-		fallings_holder = new GameObject ("Fallings").transform;
+		fallings_holder = GameObject.Find ("Fallings").transform;
 
-		player = Instantiate (player_settings.player, new Vector3 (0, 0, 0), Quaternion.identity) as GameObject; 
 	}
 
 	IEnumerator SpawnPlatforms() {
