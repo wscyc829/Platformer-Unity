@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour {
 
@@ -9,13 +10,13 @@ public class PlayerController : MonoBehaviour {
 
 	private int hp;
 
-	private GUIText hp_text;
+	private Text hp_text;
 
 	private Rigidbody2D rb2d;
 
 	void Awake () {
 		rb2d = GetComponent<Rigidbody2D>();
-		hp_text = GameObject.Find ("HP Text").GetComponent<GUIText>();
+		hp_text = GameObject.Find ("HP Text").GetComponent<Text>();
 	}
 
 	void Start(){
@@ -80,7 +81,10 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	void OnCollisionEnter2D(Collision2D coll) {
-		if(coll.gameObject.CompareTag("Platform")) {
+		if(coll.gameObject.CompareTag("Lava")) {
+			grounded = true;
+		}
+		else if(coll.gameObject.CompareTag("Platform")) {
 			grounded = true;
 		}
 	}
@@ -89,25 +93,34 @@ public class PlayerController : MonoBehaviour {
 		if(coll.gameObject.CompareTag("Lava")){
 			int damage = coll.gameObject.GetComponent<LavaController> ().damage;
 
-			LoseHp (damage);
+			UpdateHP (damage);
 		}
 	}
 
 	void OnTriggerEnter2D(Collider2D other){
 		if(other.gameObject.CompareTag("Falling")){
 			int damage = other.gameObject.GetComponent<FallingController> ().damage;
-			LoseHp (damage);
+			UpdateHP (damage);
 
 			Destroy (other.gameObject);
-		} 
+		}
 	}
 
-	void LoseHp(int lose){
-		hp -= lose;
+	void UpdateHP(int n){
+		hp -= n;
 
 		if (hp <= 0) {
 			hp = 0;
 			GameController.instance.GameOver ();
+		} else if (hp > 100) {
+			float rate = GameController.instance.player_settings.scale_rate;
+			float scale = 1 + hp / 100 * rate;
+
+			transform.localScale = new Vector3 (scale, scale ,1);
+		}
+
+		if (hp > GameController.instance.score) {
+			GameController.instance.score = hp;
 		}
 
 		hp_text.text = "HP: " + hp;

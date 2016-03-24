@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using Random = UnityEngine.Random;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour {
 	[Serializable]
@@ -46,13 +47,22 @@ public class GameController : MonoBehaviour {
 	}
 
 	[Serializable]
+	public class CloundSettings
+	{
+		public float scroll_speed;
+		public float scroll_range;
+
+		public int damage;
+	}
+
+	[Serializable]
 	public class PlayerSettings
 	{
-		public GameObject player;
 		public int hp = 100;
 		public float move_force = 365f;
 		public float max_speed = 5f;
 		public float jump_force = 1000f;
+		public float scale_rate = 0.25f;
 	}
 
 	//settings
@@ -62,21 +72,25 @@ public class GameController : MonoBehaviour {
 	public LavaSettings lava_settings;
 	public float scroll_speed;
 
-	public GameObject[] stones;
-
 	public static GameController instance = null;
 
 	//privates
 	private bool game_start = false;
 	private bool game_over = false;
 
-	private GUIText hp_text;
-	private GUIText instruction_text;
+	private Text instruction_text;
 
 	private Transform platforms_holder;
 	private Transform fallings_holder;
 
-	private float score;
+	private ParticleSystem erruption;
+	private ParticleSystem ashes;
+	private ParticleSystem clounds;
+
+	private GameObject blockImage;
+
+	[HideInInspector]
+	public int score;
 
 	void Awake() {
 		if (instance == null) {
@@ -89,10 +103,12 @@ public class GameController : MonoBehaviour {
 	}
 		
 	void Start () {
+		score = player_settings.hp;
 		InitGame ();
 	}
 
 	void OnLevelWasLoaded(int level) {
+		score = player_settings.hp;
 		InitGame ();
 	}
 
@@ -100,10 +116,14 @@ public class GameController : MonoBehaviour {
 		game_start = false;
 		game_over = false;
 
-		instruction_text = GameObject.Find ("Instruction Text").GetComponent<GUIText>();
+		instruction_text = GameObject.Find ("Instruction Text").GetComponent<Text>();
 
-		instruction_text.text = "Use 'Left & Right Arrow' To Move the Player\n" + 
-			"'Space' To Jump\n" + "Press 'R' To Start";
+		instruction_text.text = "Welcome To The Olympus!\n\n" +
+			"The world was ruined by the violent volcano.\n" +
+			"Please help the rock hero - Osamu to escape from this chaotic place.\n\n" +
+			"Use 'Left & Right Arrow' To Move Osamu\n" + 
+			"'Space' To Jump\n\n" +
+			"Press 'R' To Start";
 
 		platforms_holder = GameObject.Find ("Platforms").transform;
 		GameObject toInstantiate = platform_settings.platforms [0];
@@ -114,6 +134,11 @@ public class GameController : MonoBehaviour {
 
 		fallings_holder = GameObject.Find ("Fallings").transform;
 
+		erruption = GameObject.Find ("Erruption").GetComponent<ParticleSystem> ();
+		ashes = GameObject.Find ("Ashes").GetComponent<ParticleSystem> ();
+		clounds = GameObject.Find ("Clounds").GetComponent<ParticleSystem> ();
+
+		blockImage = GameObject.Find ("Block Image");
 	}
 
 	IEnumerator SpawnPlatforms() {
@@ -161,19 +186,19 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
-	public void SpawnStones(){
-		
-	}
-
-
 	void Update(){
 		if(!game_start && Input.GetKeyDown(KeyCode.R)){
 			instruction_text.text = "";
 			game_start = true;
-			ParticleSystem errupt = GameObject.Find ("Erruption").GetComponent<ParticleSystem> ();
-			errupt.Play ();
+
+			erruption.Play ();
+			ashes.Play ();
+			clounds.Play ();
+
 			StartCoroutine (SpawnPlatforms ());
 			StartCoroutine (SpawnFallings ());
+
+			blockImage.SetActive (false);
 		}
 
 		if(game_over && Input.GetKeyDown(KeyCode.R)){
@@ -188,9 +213,10 @@ public class GameController : MonoBehaviour {
 
 	public void GameOver() {
 		game_over = true;
-		instruction_text.text = "Press 'R' To Restart";
-		ParticleSystem errupt = GameObject.Find ("Erruption").GetComponent<ParticleSystem> ();
-		errupt.Stop ();
-		//	enabled = false;
+		instruction_text.text = "Game Over!\n" +
+			"You are incinerated.\n" + 
+			"You grow until " + score;
+
+		blockImage.SetActive (true);
 	}
 }
