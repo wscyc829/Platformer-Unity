@@ -275,4 +275,19 @@ public class GameController : MonoBehaviour {
 	public void ExitGame(){
 		Application.Quit();
 	}
+
+	public void PlayerMoveRight(){
+		PlayerController pc = GameObject.Find ("Player").GetComponent<PlayerController> ();
+		pc.MoveRight ();
+	}
+
+	public void PlayerMoveLeft(){
+		PlayerController pc = GameObject.Find ("Player").GetComponent<PlayerController> ();
+		pc.MoveLeft ();
+	}
+
+	public void PlayerJump(){
+		PlayerController pc = GameObject.Find ("Player").GetComponent<PlayerController> ();
+		pc.Jump ();
+	}
 }

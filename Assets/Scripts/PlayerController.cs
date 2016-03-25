@@ -47,8 +47,9 @@ public class PlayerController : MonoBehaviour {
 		
 	void FixedUpdate() {
 		if (GameController.instance.CanUpdate()) {
-			float h = Input.GetAxis ("Horizontal");
 
+			//#if UNITY_STANDALONE || UNITY_WEBPLAYER
+			float h = Input.GetAxis ("Horizontal");
 			float max_speed = GameController.instance.player_settings.max_speed;
 			if (h * rb2d.velocity.x < max_speed) {
 				float move_force = GameController.instance.player_settings.move_force;
@@ -71,9 +72,52 @@ public class PlayerController : MonoBehaviour {
 				jump = false;
 				grounded = false;
 			}
+			//#endif
 		}
 	}
 
+	public void MoveRight(){
+		float max_speed = GameController.instance.player_settings.max_speed;
+
+		if (rb2d.velocity.x < max_speed) {
+			float move_force = GameController.instance.player_settings.move_force;
+			rb2d.AddForce (Vector2.right * move_force);
+		}
+
+		if (Mathf.Abs (rb2d.velocity.x) > max_speed) {
+			rb2d.velocity = new Vector2 (Mathf.Sign (rb2d.velocity.x) * max_speed, rb2d.velocity.y);
+		}
+
+		if (!facingRight) {
+			Flip ();
+		}
+	}
+
+	public void MoveLeft(){
+		float max_speed = GameController.instance.player_settings.max_speed;
+
+		if (-1 * rb2d.velocity.x < max_speed) {
+			float move_force = GameController.instance.player_settings.move_force;
+			rb2d.AddForce (Vector2.left * move_force);
+		}
+
+		if (Mathf.Abs (rb2d.velocity.x) > max_speed) {
+			rb2d.velocity = new Vector2 (Mathf.Sign (rb2d.velocity.x) * max_speed, rb2d.velocity.y);
+		}
+
+		if (facingRight) {
+			Flip ();
+		}
+	}
+
+	public void Jump(){
+		if (grounded) {
+			grounded = false;
+			float jump_force = GameController.instance.player_settings.jump_force;
+			rb2d.AddForce (new Vector2 (0f, jump_force));
+			grounded = false;
+		}
+	}
 	void Flip() {
 		facingRight = !facingRight;
 		Vector3 theScale = transform.localScale;
