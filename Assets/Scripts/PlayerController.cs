@@ -16,13 +16,14 @@ public class PlayerController : MonoBehaviour {
 
 	void Awake () {
 		rb2d = GetComponent<Rigidbody2D>();
-		hp_text = GameObject.Find ("HP Text").GetComponent<Text>();
 	}
 
 	void Start(){
 		facingRight = true;
 		jump = false;
 		grounded = false;
+
+		hp_text = GameObject.Find ("HP Text").GetComponent<Text>();
 
 		hp = GameController.instance.player_settings.hp;
 

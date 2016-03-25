@@ -75,10 +75,9 @@ public class GameController : MonoBehaviour {
 	public static GameController instance = null;
 
 	//privates
-	private bool game_start = false;
-	private bool game_over = false;
-
-	private Text instruction_text;
+	private bool play_game;
+	private bool game_start;
+	private bool game_over;
 
 	private Transform platforms_holder;
 	private Transform fallings_holder;
@@ -88,6 +87,10 @@ public class GameController : MonoBehaviour {
 	private ParticleSystem clounds;
 
 	private GameObject blockImage;
+
+	private Text message_text;
+
+	private GameObject map;
 
 	[HideInInspector]
 	public int score;
@@ -100,25 +103,32 @@ public class GameController : MonoBehaviour {
 		}
 			    
 		DontDestroyOnLoad(gameObject);
+
+		ShowMainMenuUI (true);
+		ShowGameMap (false);
 	}
 		
 	void Start () {
+		play_game = false;
 		score = player_settings.hp;
-		InitGame ();
 	}
 
 	void OnLevelWasLoaded(int level) {
 		score = player_settings.hp;
+
+		ShowMainMenuUI (false);
+		ShowInGameUI (true);
+		ShowGameMap (true);
 		InitGame ();
 	}
 
-	void InitGame(){
+	public void InitGame(){
 		game_start = false;
 		game_over = false;
 
-		instruction_text = GameObject.Find ("Instruction Text").GetComponent<Text>();
+		message_text = GameObject.Find ("Message Text").GetComponent<Text>();
 
-		instruction_text.text = "Welcome To The Olympus!\n\n" +
+		message_text.text = "Welcome To The Olympus!\n\n" +
 			"The world was ruined by the violent volcano.\n" +
 			"Please help the rock hero - Osamu to escape from this chaotic place.\n\n" +
 			"Use 'Left & Right Arrow' To Move Osamu\n" + 
@@ -126,6 +136,7 @@ public class GameController : MonoBehaviour {
 			"Press 'R' To Start";
 
 		platforms_holder = GameObject.Find ("Platforms").transform;
+
 		GameObject toInstantiate = platform_settings.platforms [0];
 		(Instantiate (toInstantiate, new Vector3(-6.5f, -7.5f, 0), Quaternion.identity) as GameObject).gameObject.transform.SetParent(platforms_holder.transform);
 		(Instantiate (toInstantiate, new Vector3(0f, -7.5f, 0), Quaternion.identity) as GameObject).gameObject.transform.SetParent(platforms_holder.transform);
@@ -187,22 +198,24 @@ public class GameController : MonoBehaviour {
 	}
 
 	void Update(){
-		if(!game_start && Input.GetKeyDown(KeyCode.R)){
-			instruction_text.text = "";
-			game_start = true;
+		if (play_game) {
+			if(!game_start && Input.GetKeyDown(KeyCode.R)){
+				message_text.text = "";
+				game_start = true;
 
-			erruption.Play ();
-			ashes.Play ();
-			clounds.Play ();
+				erruption.Play ();
+				ashes.Play ();
+				clounds.Play ();
 
-			StartCoroutine (SpawnPlatforms ());
-			StartCoroutine (SpawnFallings ());
+				StartCoroutine (SpawnPlatforms ());
+				StartCoroutine (SpawnFallings ());
 
-			blockImage.SetActive (false);
-		}
+				blockImage.SetActive (false);
+			}
 
-		if(game_over && Input.GetKeyDown(KeyCode.R)){
-			SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+			if(game_over && Input.GetKeyDown(KeyCode.R)){
+				SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+			}
 		}
 	}
 
@@ -213,10 +226,53 @@ public class GameController : MonoBehaviour {
 
 	public void GameOver() {
 		game_over = true;
-		instruction_text.text = "Game Over!\n" +
+		message_text.text = "Game Over!\n" +
 			"You are incinerated.\n" + 
 			"You grow until " + score;
 
 		blockImage.SetActive (true);
+	}
+
+	public void PlayGame(bool b){
+		play_game = b;
+	}
+
+	public void ShowMainMenuUI(bool b){
+		GameObject obj = GameObject.Find ("MainMenu UI");
+
+		foreach (Transform child in obj.GetComponentsInChildren<Transform>(true)) {
+			child.gameObject.SetActive (b);
+		}
+		obj.SetActive (true);
+	}
+
+	public void ShowInstructionUI(bool b){
+		GameObject obj = GameObject.Find ("Instruction UI");
+
+		foreach (Transform child in obj.GetComponentsInChildren<Transform>(true)) {
+			child.gameObject.SetActive (b);
+		}
+		obj.SetActive (true);
+	}
+
+	public void ShowInGameUI(bool b){
+		GameObject obj = GameObject.Find ("InGame UI");
+
+		foreach (Transform child in obj.GetComponentsInChildren<Transform>(true)) {
+			child.gameObject.SetActive (b);
+		}
+		obj.SetActive (true);
+	}
+
+	public void ShowGameMap(bool b){
+		GameObject obj = GameObject.Find ("GameMap");
+
+		foreach (Transform child in obj.GetComponentsInChildren<Transform>(true)) {
+			child.gameObject.SetActive (b);
+		}
+		obj.SetActive (true);
+	}
+	public void ExitGame(){
+		Application.Quit();
 	}
 }
