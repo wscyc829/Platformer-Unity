@@ -199,7 +199,14 @@ public class GameController : MonoBehaviour {
 
 	void Update(){
 		if (play_game) {
-			if(!game_start && Input.GetKeyDown(KeyCode.R)){
+			bool b;
+			//#if UNITY_STANDALONE || UNITY_WEBPLAYER
+				b = Input.GetKeyDown (KeyCode.R);
+			//#else
+			//	b = Input.touchCount > 0 ? true : false;
+			//#endif
+
+			if(!game_start && b){
 				message_text.text = "";
 				game_start = true;
 
@@ -213,7 +220,7 @@ public class GameController : MonoBehaviour {
 				blockImage.SetActive (false);
 			}
 
-			if(game_over && Input.GetKeyDown(KeyCode.R)){
+			if(game_over && b){
 				SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 			}
 		}
